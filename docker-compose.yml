@@ -1,29 +1,69 @@
 version: '3'
-
 services:
-  php:
+
+  #PHP Servise
+  app:
     build:
       context: ./docker/php
+    container_name: "${DOCKER_PREFIX}-app"
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - db
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+      XDEBUG_CONFIG: 'discover_client_host=true client_host=172.17.0.1 log_level=0'
+    working_dir: /var/www/html
+    user: "1000:1000"
     volumes:
       - './public:/var/www/html'
       - './docker/php/zzz-xdebug.ini:/usr/local/etc/php/conf.d/zzz-xdebug.ini'
-    environment:
-      XDEBUG_CONFIG: 'discover_client_host=true client_host=172.17.0.1 log_level=0'
+    networks:
+      - app-network
 
+  #Nginx Service
   nginx:
     image: nginx:latest
+    container_name: "${DOCKER_PREFIX}-server"
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - app
     ports:
       - 80:80
     volumes:
       - './public:/var/www/html'
       - './docker/nginx/conf.d:/etc/nginx/conf.d'
+    networks:
+      - app-network
 
-  mysql:
+  #MySQL Service
+  db:
     image: mysql:8
+    container_name: "${DOCKER_PREFIX}-db"
+    restart: unless-stopped
+    tty: true
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --performance-schema --secure-file-priv=""
+    ports:
+      - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
     volumes:
       - './docker/volume/mysql:/var/lib/mysql'
+    networks:
+      - app-network
+
+  #Docker Networks
+networks:
+  app-network:
+    driver: bridge
+  #Volumes
 
 
 
