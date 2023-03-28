@@ -14,10 +14,11 @@ services:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
       XDEBUG_CONFIG: 'discover_client_host=true client_host=172.17.0.1 log_level=0'
-    working_dir: /var/www/html
+    #working_dir: /var/www
     user: "1000:1000"
     volumes:
-      - './public:/var/www/html'
+      #- './public:/var/www/html'
+      - './:/var/www'
       - './docker/php/zzz-xdebug.ini:/usr/local/etc/php/conf.d/zzz-xdebug.ini'
     networks:
       - app-network
@@ -33,7 +34,8 @@ services:
     ports:
       - 80:80
     volumes:
-      - './public:/var/www/html'
+      #- './public:/var/www/html'
+      - './:/var/www'
       - './docker/nginx/conf.d:/etc/nginx/conf.d'
     networks:
       - app-network
