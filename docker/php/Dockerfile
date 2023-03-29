@@ -1,8 +1,0 @@
-FROM php:8.1-fpm
-
-WORKDIR /var/www
-RUN apt-get update && apt-get install -y curl git zip && rm -rf /var/lib/apt/lists/*
-RUN docker-php-ext-install pdo mysqli pdo_mysql
-COPY --from=composer /usr/bin/composer /usr/bin/composer
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-WORKDIR /var/www/public
