@@ -43,11 +43,18 @@ class Router
             $controller = 'app\controllers\\' . self::$route['admin_prefix'] . self::$route['controller'] . 'Controller';
 
             if (class_exists($controller)) {
+
+                /** @var Controller $controllerObject*/
+
                 $controllerObject = new $controller(self::$route);
+
+                $controllerObject->getModel();
+
                 $action = self::lowerCamelCase(self::$route['action'] . 'Action');
 
                 if (method_exists($controllerObject, $action)) {
                     $controllerObject->$action();
+                    $controllerObject->getView();
                 } else {
                     throw new \Exception("Метод {$controller}::{$action} не найден", 404);
                 }
